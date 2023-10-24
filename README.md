@@ -1,5 +1,5 @@
 # Neural Style Transfer with MobileNetV2
-- Implementation of [A Neural Algorithm of Artistic Style](https://arxiv.org/abs/1508.06576) but with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)/[GhostNetV2_160.in1k](https://huggingface.co/timm/ghostnetv2_160.in1k) instead of VGG.
+- Implementation of [A Neural Algorithm of Artistic Style](https://arxiv.org/abs/1508.06576) but with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) or [GhostNetV2_160.in1k](https://huggingface.co/timm/ghostnetv2_160.in1k) instead of VGG.
 
 - Based on [Neural Transfer Using PyTorch](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html#neural-transfer-using-pytorch).
 
