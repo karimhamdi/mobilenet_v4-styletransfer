@@ -11,17 +11,18 @@ from torchvision.utils import save_image
 
 from PIL import Image
 from tqdm import trange
-device = torch.device("cuda:1")
 
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
 
 
+
+device = torch.device("cuda:%s"%args.device)
+
+
 def calculate_ssim(img1, img2):
     if img1.shape != img2.shape:
         img2 = resize(img2, img1.shape)
-    print(img1[0].shape)
-    print(img2[0].shape)
     return ssim(img1[0], img2[0], channel_axis=0, data_range=max(img1.max()-img1.min(), img2.max()-img2.min()))
 
 def calculate_psnr(img1, img2):
@@ -69,9 +70,6 @@ class GhostStyleModel(nn.Module):
         super().__init__()
         model = timm.create_model('ghostnet_100', pretrained=True)
         blocks = list(model.children())[:-4]
-        if args.channel_attn:
-            blocks[1] = nn.Sequential(blocks[1], ChannelAttention(blocks[1][-1].ghost2.out_chs))
-            blocks[3] = nn.Sequential(blocks[3], ChannelAttention(blocks[3][-1].ghost2.out_chs))
         self.net = nn.ModuleList(blocks)
     
     def forward(self, x: torch.Tensor):
@@ -87,18 +85,11 @@ class MobStyleModel(nn.Module):
         super().__init__()
         model = mdl.mobilenet_v2(True).features[:15]
         blocks = []
-        if args.channel_attn:
-            blocks += [nn.Sequential(model[:1], ChannelAttention(32), model[1:2])]
-            blocks += [nn.Sequential(ChannelAttention(16), model[2])]
-            blocks += [nn.Sequential(model[3:4], ChannelAttention(24), model[4:5])]
-            blocks += [nn.Sequential(model[5:7], ChannelAttention(32), model[7:8])]
-            blocks += [nn.Sequential(model[8:14], ChannelAttention(96), model[14:])]
-        else:
-            blocks += [model[:2]]
-            blocks += [model[2]]
-            blocks += [model[3:5]]
-            blocks += [model[5:8]]
-            blocks += [model[8:]]
+        blocks += [model[:2]]
+        blocks += [model[2]]
+        blocks += [model[3:5]]
+        blocks += [model[5:8]]
+        blocks += [model[8:]]
         self.net = nn.ModuleList(blocks)
     
     def forward(self, x: torch.Tensor):
@@ -235,12 +226,12 @@ def prune_channels(model, ratio=0.2):
 
 
 def wct(content_feat, style_feat, alpha=0.6):
-    # 白化
+    # Whiten
     content_mean, content_std = torch.mean(content_feat, 1), torch.std(content_feat, 1)
     style_mean, style_std = torch.mean(style_feat, 1), torch.std(style_feat, 1)
     content_feat = (content_feat - content_mean.unsqueeze(1).unsqueeze(2)) / content_std.unsqueeze(1).unsqueeze(2)
     content_feat = content_feat * style_std.unsqueeze(1).unsqueeze(2) + style_mean.unsqueeze(1).unsqueeze(2)
-    # 与内容特征混合
+    # Mix
     transformed_feat = alpha * content_feat + (1.0 - alpha) * content_feat
     return transformed_feat
 
@@ -250,22 +241,22 @@ def wct(content_feat, style_feat, alpha=0.6):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument("--device", type=str, default=0)
     parser.add_argument("--backbone", type=str, default="ghostnet")
-    parser.add_argument("--channel_attn", type=int, default=0)
     parser.add_argument("--prune_channels", type=int, default=1)
     parser.add_argument("--wct", type=int, default=1)
     args = parser.parse_args()
 
     import os
-    input_files = os.listdir("imgs/input")
-    style_files = os.listdir("imgs/style")
+    input_files = os.listdir("imgs/inputs")
+    style_files = os.listdir("imgs/styles")
     N = min(len(input_files), len(style_files))
 
     ssim_vals, psnr_vals, content_losses, style_losses = [], [], [], []
     for i in range(1, N+1):
-        input_path = f"imgs/input/in{i}.png"
-        style_path = f"imgs/style/tar{i}.png"
-        output_path = f"imgs/out111/out{i}.png"
+        input_path = f"imgs/inputs/input{i}.png"
+        style_path = f"imgs/styles/style{i}.png"
+        output_path = f"imgs/outputs/output{i}.png"
         # try:
         ssim_val, psnr_val, content_loss_val, style_loss_val = run_style_transfer(input_path, style_path, output_path)
         # except Exception as e:
