@@ -25,4 +25,4 @@ Output feature maps of the following layers are used to compute the following lo
 All images are resized to `(imsize, imsize)` before processing. Here, `imsize=256` and optimized for 50 Iterations.
 | Content Image       | Style Image     | Output Image(50 Itrs)     |
 | :------------------ | :-------------: | ---------------: |
-|<img src="./imgs/inputs/input.jpg" width="256px" height="256px">|<img src="./imgs/styles/style.jpg" width="256px" height="256px">| <img src="./imgs/outputs/output.jpg" width="256px" height="256px">|
+|<img src="./imgs/inputs/input1.jpg" width="256px" height="256px">|<img src="./imgs/styles/style1.jpg" width="256px" height="256px">| <img src="./imgs/outputs/output1.jpg" width="256px" height="256px">|
