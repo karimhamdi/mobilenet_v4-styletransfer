@@ -17,7 +17,7 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 
 
 
-device = torch.device("cuda:%s"%args.device)
+device = torch.device(args.device)
 
 
 def calculate_ssim(img1, img2):
@@ -241,7 +241,7 @@ def wct(content_feat, style_feat, alpha=0.6):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--device", type=str, default=0)
+    parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--backbone", type=str, default="ghostnet")
     parser.add_argument("--prune_channels", type=int, default=1)
     parser.add_argument("--wct", type=int, default=1)
