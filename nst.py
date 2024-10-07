@@ -79,6 +79,20 @@ class GhostStyleModel(nn.Module):
             emb.append(x)
         return emb
 
+class MobStyleV4Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        model = timm.create_model('mobilenetv4_conv_small.e2400_r224_in1k', pretrained=True)
+        blocks = list(model.children())[:-5]
+        self.net = nn.ModuleList(blocks)
+    
+    def forward(self, x: torch.Tensor):
+        emb = []
+        for block in self.net:
+            x = block(x)
+            emb.append(x)
+        return emb
+
 
 class MobStyleModel(nn.Module):
     def __init__(self):
@@ -168,6 +182,8 @@ def run_style_transfer(c_img_path: str, s_img_path: str, out_path: str = "./resu
         model = MobStyleModel().eval().to(device)
     elif args.backbone == "ghostnet":
         model = GhostStyleModel().eval().to(device)
+    elif args.backbone == "mobilenetV4":
+        model = MobStyleV4Model().eval().to(device)
     # print(model)
     
     if args.prune_channels:
@@ -242,7 +258,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", type=str, default="cpu")
-    parser.add_argument("--backbone", type=str, default="ghostnet")
+    parser.add_argument("--backbone", type=str, default="mobilenetV4")
     parser.add_argument("--prune_channels", type=int, default=1)
     parser.add_argument("--wct", type=int, default=1)
     args = parser.parse_args()
