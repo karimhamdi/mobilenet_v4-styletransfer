@@ -115,7 +115,7 @@ class PerceptualLoss(nn.Module):
         # 应用WCT
         if args.wct:
             wct_transformed_feats = [wct(c, s) for c, s in zip(c_feats, s_feats)]
-            c_loss = F.mse_loss(wct_transformed_feats[2], st_feats[2], reduction="mean")
+            c_loss = F.mse_loss(wct_transformed_feats[2][0], st_feats[2], reduction="mean")
         else:
             c_loss = F.mse_loss(c_feats[2], st_feats[2], reduction="mean")
         s_loss = 0
@@ -254,9 +254,9 @@ if __name__ == "__main__":
 
     ssim_vals, psnr_vals, content_losses, style_losses = [], [], [], []
     for i in range(1, N+1):
-        input_path = f"imgs/inputs/input{i}.png"
-        style_path = f"imgs/styles/style{i}.png"
-        output_path = f"imgs/outputs/output{i}.png"
+        input_path = f"imgs/inputs/input{i}.jpg"
+        style_path = f"imgs/styles/style{i}.jpg"
+        output_path = f"imgs/outputs/output{i}.jpg"
         # try:
         ssim_val, psnr_val, content_loss_val, style_loss_val = run_style_transfer(input_path, style_path, output_path)
         # except Exception as e:
